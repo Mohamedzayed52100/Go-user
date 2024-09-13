@@ -1,0 +1,9 @@
+# IDEA
+/.idea
+/.vscode
+
+# Secret management
+.env
+
+#tmp
+/tmp

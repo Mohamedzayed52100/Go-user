@@ -1,0 +1,492 @@
+syntax = "proto3";
+
+package user_proto;
+option go_package = "github.com/goplaceapp/goplace-user/pkg/proto;userProto";
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/empty.proto";
+
+service user {
+  // Authentication
+  rpc Login (LoginRequest) returns (LoginResponse);
+  rpc Logout (google.protobuf.Empty) returns (google.protobuf.Empty);
+  rpc ChangePassword (ChangePasswordRequest) returns (ChangePasswordResponse);
+  rpc ResendOtp (ResendOtpRequest) returns (ResendOtpResponse);
+  rpc VerifyOtp (VerifyOtpRequest) returns (VerifyOtpResponse);
+  rpc RequestResetPassword (RequestResetPasswordRequest) returns (RequestResetPasswordResponse);
+  rpc ResetPassword (ResetPasswordRequest) returns (ResetPasswordResponse);
+  rpc isOtpVerified (google.protobuf.Empty) returns (isOtpVerifiedResponse);
+
+  // Authenticated User
+  rpc GetAuthenticatedUser (google.protobuf.Empty) returns (GetAuthenticatedUserResponse);
+
+  // User CRUD
+  rpc CreateUser (CreateUserRequest) returns (CreateUserResponse);
+  rpc GetUserByID (GetUserByIDRequest) returns (GetUserByIDResponse);
+  rpc GetAllUsers (GetAllUsersRequest) returns (GetAllUsersResponse);
+  rpc UpdateUser (UpdateUserRequest) returns (UpdateUserResponse);
+  rpc DeleteUser (DeleteUserRequest) returns (DeleteUserResponse);
+
+  // Pin Code
+  rpc CheckPinCode(PinCodeRequest) returns (PinCodeResponse);
+  rpc UpdatePinCode (UpdatePinCodeRequest) returns (UpdatePinCodeResponse);
+
+  // Notifications
+  rpc SendMessage(SendMessageRequest) returns (SendMessageResponse);
+
+  // Branches
+  rpc GetAllBranches(google.protobuf.Empty) returns (GetAllBranchesResponse);
+  rpc SwitchBranch(SwitchBranchRequest) returns (SwitchBranchResponse);
+}
+
+service tenant {
+  // Demo requests
+  rpc RequestDemo (DemoRequest) returns (DemoResponse);
+
+  // Get Tenant By Client Keys
+  rpc GetTenantByClientKeys (GetTenantByClientKeysRequest) returns (GetTenantByClientKeysResponse);
+
+  // Get Tenant By Name
+  rpc GetTenantByName (GetTenantByNameRequest) returns (GetTenantByNameResponse);
+}
+
+service role{
+  // Role CRUD
+  rpc CreateRole (CreateRoleRequest) returns (CreateRoleResponse);
+  rpc GetRoleByID (GetRoleByIDRequest) returns (GetRoleByIDResponse);
+  rpc GetAllRoles (GetAllRolesRequest) returns (GetAllRolesResponse);
+  rpc UpdateRole (UpdateRoleRequest) returns (UpdateRoleResponse);
+  rpc DeleteRole (DeleteRoleRequest) returns (DeleteRoleResponse);
+  rpc GetAllPermissions (GetAllPermissionsRequest) returns (GetAllPermissionsResponse);
+  rpc GetRolePermissions (GetRolePermissionsRequest) returns (GetRolePermissionsResponse);
+}
+
+service department{
+  // Departments
+  rpc GetAllDepartments (GetAllDepartmentsRequest) returns (GetAllDepartmentsResponse);
+}
+
+// Login
+message LoginParams {
+  string email = 1;
+  string password = 2;
+  string clientID = 3;
+  string clientSecret = 4;
+}
+
+message LoginResult {
+  string accessToken = 1;
+  google.protobuf.Timestamp expiresAt = 2;
+  bool setup = 3;
+}
+
+message LoginRequest {
+  LoginParams params = 1;
+}
+
+message LoginResponse {
+  LoginResult result = 1;
+}
+
+message AuthenticatedUser {
+  int32 id = 1;
+  string firstName = 2;
+  string lastName = 3;
+  string email = 4;
+  string phoneNumber = 5;
+  Role role = 6;
+  Department department = 7;
+  string groupId = 8;
+  UBranch branch = 9;
+  string timezone = 10;
+  string avatar = 11;
+  string employeeId = 12;
+  string gender = 13;
+  google.protobuf.Timestamp birthDate = 14;
+}
+
+message GetAuthenticatedUserResponse {
+  AuthenticatedUser result = 1;
+}
+
+// Pin Code
+message PinCodeResult{
+  string status = 1;
+  string message = 2;
+}
+
+message PinCodeRequest{
+  string pinCode = 1;
+  string role = 2;
+}
+
+message PinCodeResponse{
+  PinCodeResult result = 1;
+}
+
+// Request Demo
+message DemoParams{
+  string id = 1;
+  string name = 2;
+  string email = 3;
+  string phoneNumber = 4;
+  string country = 5;
+  string restaurant_name = 6;
+  int32 branchesNo = 7;
+  bool firstTimeCrm = 8;
+  string systemName = 9;
+}
+
+message DemoRequest{
+  DemoParams params = 1;
+}
+
+message DemoResponse{
+  string result = 1;
+}
+
+// Get Tenant By ID
+message Tenant {
+  string id = 1;
+  string domain = 2;
+  string db_name = 3;
+  google.protobuf.Timestamp created_at = 4;
+  google.protobuf.Timestamp updated_at = 5;
+}
+
+message GetTenantByClientKeysRequest{
+  string clientId = 1;
+  string clientSecret = 2;
+}
+
+message GetTenantByClientKeysResponse{
+  Tenant result = 1;
+}
+
+message GetTenantByNameRequest{
+  string name = 1;
+}
+
+message GetTenantByNameResponse{
+  Tenant result = 1;
+}
+
+message Permission {
+  int32 id = 1;
+  string name = 2;
+  string displayName = 3;
+  string description = 4;
+  repeated Permission permissions = 6;
+  google.protobuf.Timestamp created_at = 7;
+  google.protobuf.Timestamp updated_at = 8;
+}
+
+message Role {
+  int32 id = 1;
+  string name = 2;
+  string displayName = 3;
+  string department = 4;
+  repeated string permissions = 5;
+  int32 usersCount = 6;
+  google.protobuf.Timestamp created_at = 7;
+  google.protobuf.Timestamp updated_at = 8;
+}
+
+message RoleParams {
+  int32 id = 1;
+  string name = 2;
+  string displayName = 3;
+  int32 department = 4;
+  repeated int32 permissions = 5;
+  bool emptyPermissions = 6;
+}
+
+message UserBranch {
+  int32 id = 1;
+  string name = 2;
+}
+
+message User {
+  int32 id = 1;
+  string employeeId = 2;
+  string firstName = 3;
+  string lastName = 4;
+  string email = 5;
+  string phoneNumber = 6;
+  string role = 7;
+  string gender = 8;
+  string department = 9;
+  string avatar = 10;
+  repeated UserBranch branches = 11;
+  google.protobuf.Timestamp joinedAt = 12;
+  google.protobuf.Timestamp birthdate = 13;
+}
+message zizo {
+  string  name = 1;
+  float salray =2 ;
+  int32 age = 3;
+  
+  
+}
+
+message UserParams {
+  int32 id = 1;
+  string employeeId = 2;
+  string firstName = 3;
+  string lastName = 4;
+  string email = 5;
+  string password = 6;
+  string phoneNumber = 7;
+  int32 role = 8;
+  string avatar = 9;
+  string birthdate = 10;
+  string joinedAt = 11;
+  repeated int32 branchIds = 12;
+  string gender = 13;
+}
+
+message CreateUserRequest {
+  UserParams params = 1;
+}
+
+message CreateUserResponse {
+  User result = 1;
+}
+
+message UpdateUserRequest {
+  UserParams params = 1;
+}
+
+message UpdateUserResponse {
+  User result = 1;
+}
+
+message DeleteUserRequest {
+  int32 id = 1;
+}
+
+message DeleteUserResponse {
+  int32 code = 1;
+  string message = 2;
+}
+
+
+message GetAllUsersRequest {
+  UPaginationParams params = 1;
+  repeated int32 role = 2;
+  repeated int32 department = 3;
+  string query = 4;
+  string fromDate = 5;
+  string toDate = 6;
+}
+
+message GetAllUsersResponse {
+  UPagination pagination = 1;
+  repeated User result = 2;
+}
+
+message GetUserByIDRequest {
+  int32 id = 1;
+}
+
+message GetUserByIDResponse {
+  User result = 1;
+}
+
+message UPagination {
+  int32 total = 1;
+  int32 perPage = 2;
+  int32 currentPage = 3;
+  int32 lastPage = 4;
+  int32 from = 5;
+  int32 to = 6;
+}
+
+message UPaginationParams {
+  int32 perPage = 1;
+  int32 currentPage = 2;
+}
+
+message GetAllRolesRequest {
+  UPaginationParams params = 1;
+  repeated int32 department = 2;
+  string query = 3;
+}
+
+message GetAllRolesResponse {
+  UPagination pagination = 1;
+  repeated Role result = 2;
+}
+
+message GetRoleByIDRequest {
+  int32 id = 1;
+}
+
+message GetRoleByIDResponse {
+  Role result = 1;
+}
+
+message CreateRoleRequest {
+  RoleParams params = 1;
+}
+
+message CreateRoleResponse {
+  Role result = 1;
+}
+
+message UpdateRoleRequest {
+  RoleParams params = 1;
+}
+
+message UpdateRoleResponse {
+  Role result = 1;
+}
+
+message DeleteRoleRequest {
+  int32 id = 1;
+}
+
+message DeleteRoleResponse {
+  int32 code = 1;
+  string message = 2;
+}
+
+message GetAllPermissionsRequest {
+  repeated int32 department = 1;
+  string query = 2;
+}
+
+message GetAllPermissionsResponse {
+  repeated Permission result = 1;
+}
+
+message Department {
+  int32 id = 1;
+  string name = 2;
+  google.protobuf.Timestamp createdAt = 3;
+  google.protobuf.Timestamp updatedAt = 4;
+}
+
+message UBranch {
+  int32 id = 1;
+  string name = 2;
+  string currency = 3;
+}
+
+message GetAllDepartmentsRequest {
+  UPaginationParams params = 1;
+}
+
+message GetAllDepartmentsResponse {
+  UPagination pagination = 1;
+  repeated Department result = 2;
+}
+
+message GetRolePermissionsRequest {
+  int32 role = 1;
+}
+
+message GetRolePermissionsResponse {
+  repeated string result = 1;
+}
+
+
+message SendMessageRequest{
+  repeated int32 to = 1;
+  string message = 2;
+}
+
+message SendMessageResponse{
+  int32 code = 1;
+  string message = 2;
+}
+
+message ChangePasswordRequest{
+  string oldPassword = 1;
+  string newPassword = 2;
+  string confirmNewPassword = 3;
+}
+
+message ChangePasswordResponse{
+  int32 code = 1;
+  string message = 2;
+}
+
+message UpdatePinCodeRequest{
+  string oldPinCode = 1;
+  string newPinCode = 2;
+  string confirmNewPinCode = 3;
+}
+
+message UpdatePinCodeResponse{
+  int32 code = 1;
+  string message = 2;
+}
+
+message VerifyOtpRequest {
+  string code = 1;
+  string token = 2;
+}
+
+message VerifyOtpResponse {
+  int32 code = 1;
+  string message = 2;
+}
+
+message RequestResetPasswordRequest {
+  string email = 1;
+  string phoneNumber = 2;
+}
+
+message RequestResetPasswordResponse {
+  string token = 1;
+}
+
+message ResendOtpRequest {
+  string token = 1;
+}
+
+message ResendOtpResponse {
+  int32 code = 1;
+  string message = 2;
+}
+
+message ResetPasswordRequest{
+  string token = 1;
+  string newPassword = 2;
+  string confirmNewPassword = 3;
+}
+
+message ResetPasswordResponse{
+  int32 code = 1;
+  string message = 2;
+}
+
+message Branch {
+  int32 id = 1;
+  string name = 2;
+  string country = 3;
+  string city = 4;
+  string address = 5;
+  string phoneNumber = 6;
+  string email = 7;
+  string gmapsLink = 8;
+  string website = 9;
+  google.protobuf.Timestamp createdAt = 10;
+  google.protobuf.Timestamp updatedAt = 11;
+}
+
+message GetAllBranchesResponse {repeated Branch result = 1;}
+
+
+message SwitchBranchRequest {
+  int32 branchId = 1;
+}
+
+message SwitchBranchResponse {
+  int32 code = 1;
+  string message = 2;
+}
+
+message isOtpVerifiedResponse {
+  bool result = 1;
+}
